@@ -140,7 +140,24 @@ if submitted:
                 st.markdown("---")
                 st.markdown("## Résultats")
 
-                # Métriques principales
+                # Niveau
+                level_colors = {
+                    "Débutant":      "#74C0FC",
+                    "Intermédiaire": "#69DB7C",
+                    "Avancé":        "#FF922B",
+                    "Expert":        "#F03E3E",
+                }
+                level = data.get("level_label", "")
+                color = level_colors.get(level, "#ADB5BD")
+                st.markdown(
+                    f"<div style='background:{color};padding:14px 20px;border-radius:8px;"
+                    f"display:inline-block;margin-bottom:16px'>"
+                    f"<span style='font-size:1.2rem;font-weight:600;color:#212529'>Niveau : {level}</span>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+                # Temps par distance
                 cols = st.columns(4)
                 for col, pred in zip(cols, predictions):
                     col.metric(pred["distance"], pred["formatted"])

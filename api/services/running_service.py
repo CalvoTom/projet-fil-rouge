@@ -44,6 +44,21 @@ def _vdot_to_marathon(vo2max: float, gender: int) -> int:
     marathon_sec = int((42.195 / speed_kmh) * 3600)
     return marathon_sec
 
+# Seuils basés sur le temps marathon (secondes)
+# Indépendants du genre — le modèle corrige déjà via la feature gender
+RUNNING_LEVELS = [
+    ("Débutant",       16200),   # > 4h30
+    ("Intermédiaire",  12600),   # 3h30 – 4h30
+    ("Avancé",         10800),   # 3h00 – 3h30
+    ("Expert",             0),   # < 3h00
+]
+
+def _get_running_level(marathon_sec: int) -> str:
+    for label, threshold in RUNNING_LEVELS:
+        if marathon_sec >= threshold:
+            return label
+    return "Expert"
+
 DISTANCES = [
     ("5km", 5.0),
     ("10km", 10.0),
@@ -73,6 +88,7 @@ def predict_simple(age: int, gender: int, resting_hr: int,
 
     return {
         "mode": "simple",
+        "level_label": _get_running_level(marathon_sec),
         "predictions": predictions,
         "vo2max_estimated": round(vo2max, 1),
         "method": "Formule Uth (FC repos→VO2max) + VDOT Jack Daniels + Riegel",
@@ -132,6 +148,7 @@ def predict_advanced(age: int, gender: int,
 
     return {
         "mode": "advanced",
+        "level_label": _get_running_level(marathon_sec),
         "predictions": predictions,
         "vo2max_estimated": vo2max,
         "method": "Gradient Boosting (Boston Marathon 2015-2017) + Riegel",

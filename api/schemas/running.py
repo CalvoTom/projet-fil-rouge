@@ -35,6 +35,7 @@ class DistancePrediction(BaseModel):
 class RunningOutput(BaseModel):
     sport: str = "running"
     mode: str
+    level_label: str
     predictions: list[DistancePrediction]
     vo2max_estimated: Optional[float]
     method: str

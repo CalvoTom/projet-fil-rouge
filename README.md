@@ -114,6 +114,7 @@ curl -X POST http://localhost:8008/api/v1/running/predict/simple \
 {
   "sport": "running",
   "mode": "simple",
+  "level_label": "Débutant",
   "predictions": [
     { "distance": "5km",           "seconds": 1680, "formatted": "28m00s" },
     { "distance": "10km",          "seconds": 3502, "formatted": "58m22s" },
@@ -156,6 +157,7 @@ curl -X POST http://localhost:8008/api/v1/running/predict/advanced \
 {
   "sport": "running",
   "mode": "advanced",
+  "level_label": "Avancé",
   "predictions": [
     { "distance": "5km",           "seconds": 1261, "formatted": "21m01s" },
     { "distance": "10km",          "seconds": 2630, "formatted": "43m50s" },
