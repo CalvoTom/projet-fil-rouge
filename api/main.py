@@ -8,6 +8,8 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Port par défaut : 8008 (voir README pour lancer)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

@@ -66,14 +66,14 @@ notebooks/04_model_climbing.ipynb
 
 ```bash
 # Terminal 1 — API FastAPI
-cd api && uvicorn main:app --reload --port 8000
+python3 -m uvicorn api.main:app --reload --port 8008
 
 # Terminal 2 — Interface Streamlit
-cd app && streamlit run main.py
+streamlit run app/main.py
 ```
 
 - Interface : http://localhost:8501
-- Documentation API : http://localhost:8000/docs
+- Documentation API : http://localhost:8008/docs
 
 ---
 

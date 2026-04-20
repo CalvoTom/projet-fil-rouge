@@ -197,13 +197,11 @@ joblib>=1.3.0
 
 ```bash
 # 1. Lancer l'API FastAPI
-cd api
-uvicorn main:app --reload --port 8000
+python3 -m uvicorn api.main:app --reload --port 8008
 
 # 2. Lancer l'app Streamlit (dans un autre terminal)
-cd app
-streamlit run main.py
+streamlit run app/main.py
 
 # Documentation API disponible sur :
-# http://localhost:8000/docs
+# http://localhost:8008/docs
 ```
