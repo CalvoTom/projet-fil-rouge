@@ -1,0 +1,63 @@
+{
+  "model_type": "Gradient Boosting",
+  "problem_type": "classification",
+  "sport": "climbing",
+  "features": [
+    "sex",
+    "height",
+    "weight",
+    "bmi",
+    "age",
+    "years_cl"
+  ],
+  "target": "level_class (0-4)",
+  "level_labels": [
+    "Débutant (< 6a)",
+    "Intermédiaire bas (6a–6b+)",
+    "Intermédiaire (6c–7a+)",
+    "Avancé (7b–7c+)",
+    "Expert (8a+)"
+  ],
+  "level_ranges": [
+    {
+      "min_fra": "5a",
+      "max_fra": "6a"
+    },
+    {
+      "min_fra": "6a",
+      "max_fra": "6b+"
+    },
+    {
+      "min_fra": "6c",
+      "max_fra": "7a+"
+    },
+    {
+      "min_fra": "7b",
+      "max_fra": "7c+"
+    },
+    {
+      "min_fra": "8a",
+      "max_fra": "8c+"
+    }
+  ],
+  "train_samples": 8728,
+  "test_samples": 2182,
+  "metrics": {
+    "accuracy": 0.3822,
+    "within_1_class_pct": 78.2,
+    "cv_accuracy_mean": 0.3886,
+    "cv_accuracy_std": 0.0107
+  },
+  "prediction_modes": {
+    "potential": "years_cl = 0 → règles physiologiques (dead hang, BMI, tractions)",
+    "ml": "years_cl ≥ 1 → classification Random Forest"
+  },
+  "why_classification": "La régression sur grade précis donnait MAE=6.7 grades (R²=0.25). La classification par niveau est plus honnête et plus utile pour l utilisateur.",
+  "dataset": "jordizar/climb-dataset (8a.nu)",
+  "trained_at": "2026-04-20T12:31:39.328730",
+  "limitations": [
+    "Dataset surreprésenté en grimpeurs avancés (médiane 7b)",
+    "Aucun grimpeur avec 0 an de pratique dans les données",
+    "Dead hang absent du dataset — utilisé uniquement en mode potentiel"
+  ]
+}
