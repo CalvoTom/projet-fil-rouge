@@ -1,0 +1,47 @@
+# Données brutes (trop volumineuses pour Git)
+data/raw/
+data/processed/
+*.csv
+*.sqlite
+*.db
+*.zip
+
+# Données externes conservées (petits fichiers de référence)
+!data/external/
+
+# Modèles sérialisés (versionnés séparément si nécessaire)
+models/*.pkl
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Kaggle credentials
+.kaggle/
+kaggle.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
