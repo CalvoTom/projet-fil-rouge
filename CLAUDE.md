@@ -142,9 +142,9 @@ projet-fil-rouge/
 |---|---|---|
 | Cadrage projet | ✅ Terminé | Sports, stack, datasets décidés |
 | Setup repo & docs | ✅ En cours | Structure créée |
-| Téléchargement datasets | ⬜ À faire | Kaggle : boston-results + 8anu-climbing-logbook |
-| EDA Running | ⬜ À faire | |
-| EDA Escalade | ⬜ À faire | |
+| Téléchargement datasets | ✅ Terminé | Boston Marathon (data/raw/running/) + Climb Dataset (data/raw/climbing/) |
+| EDA Running | ✅ Notebook créé | notebooks/01_eda_running.ipynb — à exécuter |
+| EDA Escalade | ✅ Notebook créé | notebooks/02_eda_climbing.ipynb — à exécuter |
 | Modèle Running | ⬜ À faire | |
 | Modèle Escalade | ⬜ À faire | |
 | FastAPI | ⬜ À faire | |

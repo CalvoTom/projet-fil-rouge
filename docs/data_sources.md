@@ -15,7 +15,7 @@
 | **Auteur** | rojour |
 | **Format** | CSV |
 | **Taille** | ~80 000 lignes (3 fichiers annuels) |
-| **Statut** | À télécharger |
+| **Statut** | ✅ Téléchargé — `data/raw/running/` |
 | **Licence** | Publique (Kaggle) |
 
 **Colonnes disponibles** :
@@ -34,43 +34,35 @@
 
 ---
 
-### Escalade — 8a.nu Climbing Logbook
-
-| Attribut | Valeur |
-|---|---|
-| **Source** | Kaggle |
-| **URL** | https://www.kaggle.com/datasets/dcohen21/8anu-climbing-logbook |
-| **Auteur** | dcohen21 |
-| **Format** | SQLite (base de données) |
-| **Taille** | 4,1M ascensions / 62 000 grimpeurs uniques |
-| **Statut** | À télécharger |
-| **Licence** | Publique (Kaggle) — données scrapées 8a.nu (2017) |
-
-**Tables disponibles** :
-- `users` : height, weight, age, years_climbing, occupation, gender (53 902 hommes / 8 691 femmes)
-- `ascents` : 4M+ enregistrements d'ascensions avec timestamps, user_id, grade_id
-- `grades` : mapping numérique (0-82) ↔ cotation française (5a → 9c+)
-- `methods` : type d'escalade (falaise/bloc)
-
-**Usage prévu** :
-- EDA : distributions physiologiques, corrélation poids/niveau, progression par âge
-- Modèle : taille + poids + âge + années pratique (+ dead hang mode avancé) → grade max prédit
-- Cible : grade numérique (0-82) → affiché en cotation française
-
-**Biais connu** :
-- Surreprésentation des grimpeurs avancés (8a.nu est utilisé par les grimpeurs sérieux)
-- À documenter et mitiger par stratification de l'échantillon
-
----
-
-## Dataset de fallback — Escalade
+### Escalade — Climb Dataset (jordizar)
 
 | Attribut | Valeur |
 |---|---|
 | **Source** | Kaggle |
 | **URL** | https://www.kaggle.com/datasets/jordizar/climb-dataset |
-| **Format** | CSV (pré-nettoyé) |
-| **Usage** | Fallback si 8a.nu SQLite pose des problèmes de chargement |
+| **Auteur** | jordizar |
+| **Format** | CSV (3 fichiers) |
+| **Taille** | 10 927 grimpeurs uniques |
+| **Statut** | ✅ Téléchargé — `data/raw/climbing/` |
+| **Licence** | DbCL-1.0 |
+
+**Fichiers disponibles** :
+- `climber_df.csv` : profils grimpeurs (user_id, country, sex, height, weight, age, years_cl, grades_max, grades_mean, grades_count...)
+- `grades_conversion_table.csv` : mapping grade_id (0-84) ↔ cotation française (5a → 9c+)
+- `routes_rated.csv` : routes cotées
+
+**Colonnes clés pour la modélisation** :
+- Features : `sex` (0/1), `height`, `weight`, `age`, `years_cl`
+- Target : `grades_max` (numérique 29-77, médiane 53 ≈ 7b)
+
+**Qualité** : 0 valeurs manquantes sur toutes les colonnes
+
+**Biais connu** :
+- Dataset issu de 8a.nu — surreprésentation des grimpeurs avancés
+- grades_max médian = 53 (7b) : peu de débutants dans le dataset
+- À documenter dans le notebook et mitiger par communication claire des limites
+
+**Note** : Le dataset original 8a.nu (dcohen21, 4M ascensions, SQLite) est inaccessible via API (page supprimée). Ce dataset CSV en est une version consolidée suffisante pour le projet.
 
 ---
 
