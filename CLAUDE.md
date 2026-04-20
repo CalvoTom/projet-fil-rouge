@@ -71,13 +71,18 @@ Application web permettant à un utilisateur de saisir ses données physiologiqu
 - **Baseline à battre** : Formule Riegel
 
 ### Escalade
-- **Problème** : Régression (grade numérique 0-82)
-- **Features mode simple** : Poids, taille, âge, dead hang (secondes)
-- **Features mode avancé** : + Années pratique, fréquence hebdo, tractions max
-- **Target** : Grade max (numérique → converti en cotation française)
+- **Problème** : Régression (grade numérique 0-82) — mais avec logique conditionnelle selon expérience
+- **Architecture** :
+  - `years_cl = 0` → Mode POTENTIEL : règles physiologiques (dead hang, poids, BMI), fourchette large, pas de ML
+  - `years_cl < 1` → Mode ESTIMATION : ML avec intervalle élargi + disclaimer
+  - `years_cl ≥ 1` → Mode ML : Random Forest fiable (6a → 8b+)
+- **Features ML** : sex, height, weight, bmi, age, years_cl
+- **Features mode potentiel** : dead hang, poids, BMI, tractions (règles métier)
+- **Target** : Grade max numérique → cotation française
 - **Modèle** : Random Forest Regressor
 - **Métriques** : MAE en grades, Accuracy ±1 grade
 - **Baseline à battre** : Moyenne par tranche d'âge/poids
+- **Biais documenté** : Dataset surreprésenté en grimpeurs avancés (médiane 7b). 0 débutant absolu dans les données.
 
 ---
 
@@ -145,8 +150,8 @@ projet-fil-rouge/
 | Téléchargement datasets | ✅ Terminé | Boston Marathon (data/raw/running/) + Climb Dataset (data/raw/climbing/) |
 | EDA Running | ✅ Notebook créé | notebooks/01_eda_running.ipynb — à exécuter |
 | EDA Escalade | ✅ Notebook créé | notebooks/02_eda_climbing.ipynb — à exécuter |
-| Modèle Running | ⬜ À faire | |
-| Modèle Escalade | ⬜ À faire | |
+| Modèle Running | ✅ Notebook créé | notebooks/03_model_running.ipynb — à exécuter |
+| Modèle Escalade | ✅ Notebook créé | notebooks/04_model_climbing.ipynb — à exécuter |
 | FastAPI | ⬜ À faire | |
 | Streamlit | ⬜ À faire | |
 | Documentation finale | ⬜ À faire | |

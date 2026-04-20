@@ -102,6 +102,44 @@
 
 ---
 
+## ADR-007 — Escalade : architecture conditionnelle ML vs règles métier selon l'expérience
+
+**Date** : 2026-04-20  
+**Statut** : Accepté
+
+**Contexte** : Analyse du dataset révèle que :
+- 0 grimpeur avec 0 an de pratique (years_cl minimum = 1)
+- Les grimpeurs classés < 6a ont en réalité une médiane de 9 ans de pratique — ce sont des grimpeurs qui plafonnent, pas des débutants
+- Un débutant absolu est hors distribution du modèle ML
+
+**Décision** : Architecture en 3 chemins selon l'expérience déclarée.
+
+```
+"Avez-vous déjà grimpé ?"
+       /              \
+     Non              Oui → "Depuis combien de temps ?"
+      │                         /            \
+      ▼                      < 1 an        ≥ 1 an
+  Mode POTENTIEL          Estimation      Modèle ML
+  (règles physio)         prudente        (fiable)
+```
+
+- **Mode POTENTIEL** (jamais grimpé) : règles physiologiques issues de la littérature (dead hang, poids, BMI, tractions). Retourne une fourchette large avec disclaimer explicite.
+- **Mode ESTIMATION** (< 1 an) : modèle ML avec intervalle de confiance élargi et avertissement sur la fiabilité.
+- **Mode ML** (≥ 1 an) : modèle entraîné sur le dataset. Fiable de 6a à 8b+.
+
+**Raisons** :
+- Extrapoler le ML hors distribution serait scientifiquement non défendable
+- Cette architecture est plus honnête, plus utile, et valorisable en soutenance
+- Argument oral : "nous avons détecté le biais et conçu une réponse architecturale"
+
+**Conséquences** :
+- Le notebook de modélisation inclut une section sur les limites de distribution
+- L'API retourne un champ `mode_used` et `confidence` dans chaque réponse
+- L'interface Streamlit affiche un disclaimer adapté selon le mode activé
+
+---
+
 ## ADR-006 — Approche modélisation Running : baseline déterministe + ML
 
 **Date** : 2026-04-20  
