@@ -7,11 +7,11 @@
     "gender",
     "dist_km"
   ],
-  "dataset": "vladislavboyadzhi/triathlon-results — Sprint/Olympic/Half/Full bike splits (tous niveaux)",
-  "n_train": 2049853,
-  "n_test": 512464,
-  "mae_kmh": 3.16,
-  "mape_pct": 11.04,
-  "r2": 0.1182,
-  "note": "Prédit la vitesse moyenne attendue selon profil. Mode avancé : correction par vitesse de référence utilisateur via Riegel."
+  "dataset": "vladislavboyadzhi/triathlon-results",
+  "n_train": 2115255,
+  "n_test": 528814,
+  "mae_kmh": 3.14,
+  "mape_pct": 10.99,
+  "r2": 0.1218,
+  "trained_at": "2026-04-22T09:22:50.244039"
 }

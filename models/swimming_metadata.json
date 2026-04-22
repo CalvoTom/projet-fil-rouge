@@ -1,17 +1,17 @@
 {
   "sport": "swimming",
   "model": "GradientBoostingRegressor",
-  "target": "pace_per_100m_seconds",
+  "target": "pace_per_100m",
   "features": [
     "age",
     "gender",
     "dist_m"
   ],
-  "dataset": "vladislavboyadzhi/triathlon-results — Sprint/Olympic/Half/Full swim splits (tous niveaux)",
-  "n_train": 2004420,
-  "n_test": 501105,
-  "mae_sec_per_100m": 19.9,
-  "mape_pct": 16.84,
-  "r2": 0.0536,
-  "note": "Prédit allure attendue (s/100m). Mode avancé : référence utilisateur + Riegel."
+  "dataset": "vladislavboyadzhi/triathlon-results",
+  "n_train": 2074854,
+  "n_test": 518714,
+  "mae_sec_per_100m": 19.73,
+  "mape_pct": 16.71,
+  "r2": 0.058,
+  "trained_at": "2026-04-22T09:23:58.343862"
 }
