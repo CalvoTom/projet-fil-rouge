@@ -6,7 +6,10 @@ router = APIRouter(prefix="/swimming", tags=["Swimming"])
 
 @router.post("/predict/simple", response_model=SwimmingOutput)
 def predict_swimming_simple(data: SwimmingInputSimple):
-    result = swimming_service.predict_simple(age=data.age, gender=data.gender)
+    result = swimming_service.predict_simple(
+        age=data.age, gender=data.gender,
+        weight_kg=data.weight_kg, height_cm=data.height_cm,
+    )
     return SwimmingOutput(**result)
 
 @router.post("/predict/advanced", response_model=SwimmingOutput)

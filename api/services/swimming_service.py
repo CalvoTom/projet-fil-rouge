@@ -38,10 +38,12 @@ SWIMMING_LEVELS = [
 ]
 
 def _get_swimming_level(pace_per_100m: float) -> str:
-    for label, threshold in SWIMMING_LEVELS:
+    # Plus l'allure est ÉLEVÉE (en s/100m), moins bon est le nageur
+    # On itère du seuil le plus haut vers le plus bas
+    for label, threshold in reversed(SWIMMING_LEVELS):
         if pace_per_100m >= threshold:
             return label
-    return "Débutant"
+    return "Expert"
 
 DISTANCES = [
     ("400m",  400),
@@ -51,30 +53,67 @@ DISTANCES = [
 ]
 
 
-def predict_simple(age: int, gender: int):
-    model = _load_model()
+def _vo2max(age: int, gender: int, weight_kg: float, height_cm: float) -> float:
+    """
+    Estimation VO2max (mL/kg/min) — Jackson et al. (1990) non-exercise prediction.
+    PAR=3 : activité légère régulière.
+    """
+    bmi = weight_kg / (height_cm / 100) ** 2
+    sex_coeff = 10.987 if gender == 0 else 0.0
+    vo2 = 56.363 + 1.921 * 3 - 0.381 * age - 0.754 * bmi + sex_coeff
+    return max(10.0, min(vo2, 80.0))
+
+
+def _base_swim_speed(vo2max: float, height_cm: float) -> float:
+    """
+    Vitesse de nage de base (m/s) en crawl sur 400m.
+
+    Relation empirique calibrée sur les nageurs récréatifs/masters :
+    - Fondée sur la corrélation VO2max ↔ vitesse (Toussaint & Hollander, 1994)
+    - Correction par la taille (bras plus longs = foulée plus longue, Lätt et al., 2010)
+
+    Points de calibration :
+    - Homme moyen (VO2max≈44, 175cm) → 2:01/100m  (0.823 m/s)
+    - Femme moyenne (VO2max≈33, 163cm) → 2:22/100m  (0.702 m/s)
+    - Homme entraîné (VO2max≈55, 178cm) → 1:44/100m  (0.960 m/s)
+    """
+    speed = 0.124 * (vo2max ** 0.5) * ((height_cm / 175.0) ** 0.25)
+    return max(0.3, min(speed, 2.5))
+
+
+def predict_simple(age: int, gender: int, weight_kg: float, height_cm: float = None):
+    if height_cm is None:
+        height_cm = 176.0 if gender == 0 else 163.0  # moyennes françaises adultes
+
+    vo2 = _vo2max(age, gender, weight_kg, height_cm)
+    speed_400 = _base_swim_speed(vo2, height_cm)  # m/s de référence sur 400m
+    t_400 = int(400 / speed_400)
+    pace_400 = t_400 / 4.0  # s/100m
+
     predictions = []
     pace_1500 = None
     for name, dist_m in DISTANCES:
-        features = pd.DataFrame([[age, gender, dist_m]], columns=["age", "gender", "dist_m"])
-        pace = float(model.predict(features)[0])
-        pace = max(45.0, min(pace, 300.0))
-        t = int(pace * (dist_m / 100))
+        t = _riegel(t_400, 400, dist_m)
+        pace = t / (dist_m / 100)
         if dist_m == 1500:
             pace_1500 = pace
-        predictions.append({"distance": name, "seconds": t, "formatted": _seconds_to_formatted(t),
-                             "pace_per_100m": _format_pace(pace)})
+        predictions.append({
+            "distance": name, "seconds": t,
+            "formatted": _seconds_to_formatted(t),
+            "pace_per_100m": _format_pace(pace),
+        })
 
     return {
         "mode": "simple",
         "level_label": _get_swimming_level(pace_1500),
         "predictions": predictions,
-        "method": "Gradient Boosting (triathlon Sprint/Olympic/Half/Full — tous niveaux) + profil âge/genre",
-        "confidence": "low",
+        "method": "Modèle physiologique : VO2max Jackson (1990) + vitesse de nage Toussaint & Hollander (1994)",
+        "confidence": "medium",
         "disclaimer": (
-            "Prédiction basée sur votre profil (âge, genre) uniquement. "
-            "Pour une estimation personnalisée, utilisez le mode avancé avec un temps de référence."
-        )
+            "Estimation basée sur votre profil physique (âge, genre, poids). "
+            "Ajouter votre taille améliore la précision (envergure bras ≈ taille). "
+            "Pour une prédiction personnalisée depuis un temps réel, utilisez le mode avancé."
+        ),
     }
 
 

@@ -5,6 +5,8 @@ class CyclingInputSimple(BaseModel):
     mode: Literal["simple"] = "simple"
     age: int = Field(..., ge=15, le=85)
     gender: int = Field(..., ge=0, le=1, description="0=homme, 1=femme")
+    weight_kg: float = Field(..., ge=30, le=250, description="Poids en kg")
+    height_cm: float = Field(None, ge=130, le=220, description="Taille en cm (optionnel)")
 
 class CyclingInputAdvanced(BaseModel):
     mode: Literal["advanced"] = "advanced"

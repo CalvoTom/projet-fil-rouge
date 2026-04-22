@@ -79,6 +79,9 @@ with st.form("swimming_form"):
         age = st.number_input("Âge", min_value=10, max_value=85, value=30)
         gender = st.selectbox("Sexe", ["Homme", "Femme"])
         gender_val = 0 if gender == "Homme" else 1
+        if not is_advanced:
+            weight_kg = st.number_input("Poids (kg)", min_value=30, max_value=250, value=70)
+            height_cm = st.number_input("Taille (cm) — optionnel", min_value=130, max_value=220, value=175)
 
     with col2:
         if is_advanced:
@@ -88,8 +91,14 @@ with st.form("swimming_form"):
             ref_minutes = st.number_input("Minutes", min_value=0, max_value=120, value=7)
             ref_seconds_input = st.number_input("Secondes", min_value=0, max_value=59, value=30)
         else:
-            st.markdown("##### Mode simple")
-            st.info("Le modèle prédit votre performance attendue selon votre âge et genre, sur la base de 2,5M+ résultats de triathlons (Sprint / Olympic / Half / Full).")
+            st.markdown("##### À propos du mode simple")
+            st.info(
+                "Le modèle physiologique estime votre VO2max (Jackson et al., 1990) "
+                "depuis votre âge, genre et poids, puis calcule votre allure de nage via "
+                "la relation VO2max ↔ vitesse de nage (Toussaint & Hollander, 1994) "
+                "avec correction par la taille (envergure bras). "
+                "Un nageur de 60 kg sera prédit différemment d'un nageur de 150 kg pour le même âge."
+            )
 
     submitted = st.form_submit_button("Prédire mes temps", use_container_width=True)
 
@@ -97,7 +106,10 @@ if submitted:
     with st.spinner("Calcul en cours..."):
         try:
             if not is_advanced:
-                payload = {"mode": "simple", "age": age, "gender": gender_val}
+                payload = {
+                    "mode": "simple", "age": age, "gender": gender_val,
+                    "weight_kg": weight_kg, "height_cm": height_cm,
+                }
                 resp = requests.post(f"{API_URL}/predict/simple", json=payload, timeout=10)
             else:
                 total_sec = ref_minutes * 60 + ref_seconds_input
@@ -163,10 +175,12 @@ if submitted:
 st.markdown("---")
 with st.expander("ℹ️ Comment fonctionnent les prédictions ?"):
     st.markdown("""
-**Mode simple** — Sans temps de référence :
-- Modèle Gradient Boosting entraîné sur 2,5M+ résultats de triathlons (Sprint 750m / Olympic 1500m / Half 1900m / Full 3800m)
-- Prédit l'allure attendue selon votre profil âge/genre
-- Précision indicative ±20%
+**Mode simple** — Profil physique complet :
+- Estimation VO2max (Jackson et al., 1990) depuis âge / genre / poids / taille
+- Conversion en vitesse de nage via la relation VO2max ↔ performance (Toussaint & Hollander, 1994)
+- Correction par la taille : envergure des bras ≈ longueur de foulée (Lätt et al., 2010)
+- Extrapolation aux distances via formule Riegel adaptée à la natation (exposant 1.02)
+- Précision indicative ±20% (profil physiologique moyen sans données d'entraînement)
 
 **Mode avancé** — Avec un temps récent :
 - Formule Riegel : T₂ = T₁ × (D₂/D₁)^1.06

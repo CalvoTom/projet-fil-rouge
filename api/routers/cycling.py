@@ -6,7 +6,10 @@ router = APIRouter(prefix="/cycling", tags=["Cycling"])
 
 @router.post("/predict/simple", response_model=CyclingOutput)
 def predict_cycling_simple(data: CyclingInputSimple):
-    result = cycling_service.predict_simple(age=data.age, gender=data.gender)
+    result = cycling_service.predict_simple(
+        age=data.age, gender=data.gender,
+        weight_kg=data.weight_kg, height_cm=data.height_cm,
+    )
     return CyclingOutput(**result)
 
 @router.post("/predict/advanced", response_model=CyclingOutput)

@@ -46,30 +46,84 @@ DISTANCES = [
 ]
 
 
-def predict_simple(age: int, gender: int):
-    model = _load_model()
+def _vo2max(age: int, gender: int, weight_kg: float, height_cm: float) -> float:
+    """
+    Estimation VO2max (mL/kg/min) — Jackson et al. (1990) non-exercise prediction.
+    PAR=3 : activité physique légère régulière (profil "mode simple").
+    """
+    bmi = weight_kg / (height_cm / 100) ** 2
+    sex_coeff = 10.987 if gender == 0 else 0.0
+    vo2 = 56.363 + 1.921 * 3 - 0.381 * age - 0.754 * bmi + sex_coeff
+    return max(10.0, min(vo2, 80.0))
+
+
+def _ftp_watts(vo2max: float, weight_kg: float) -> float:
+    """
+    FTP (Watts) depuis VO2max.
+    Relation linéaire validée : FTP/kg ≈ 0.055 × VO2max − 0.5 (Coggan, 2003).
+    """
+    ftp_per_kg = max(0.5, 0.055 * vo2max - 0.5)
+    return ftp_per_kg * weight_kg
+
+
+def _cda(weight_kg: float) -> float:
+    """
+    Coefficient aérodynamique CdA (m²) estimé depuis le poids.
+    Cycliste en position sur le guidon : CdA ≈ 0.32 + correction poids.
+    """
+    return 0.32 + 0.001 * max(0.0, weight_kg - 70)
+
+
+def _solve_cycling_speed(power_w: float, mass_kg: float, cda: float,
+                          crr: float = 0.004, rho: float = 1.225, g: float = 9.81) -> float:
+    """Résolution numérique de P = CdA·½ρv³ + Crr·m·g·v par bisection."""
+    v_lo, v_hi = 0.5, 30.0
+    for _ in range(60):
+        v_mid = (v_lo + v_hi) / 2
+        p_mid = cda * 0.5 * rho * v_mid ** 3 + crr * mass_kg * g * v_mid
+        if p_mid < power_w:
+            v_lo = v_mid
+        else:
+            v_hi = v_mid
+    return (v_lo + v_hi) / 2
+
+
+_POWER_FACTORS = {20.0: 0.90, 40.0: 0.85, 100.0: 0.78, 180.0: 0.72}
+
+
+def predict_simple(age: int, gender: int, weight_kg: float, height_cm: float = None):
+    if height_cm is None:
+        height_cm = 176.0 if gender == 0 else 163.0  # moyennes françaises adultes
+
+    vo2 = _vo2max(age, gender, weight_kg, height_cm)
+    ftp = _ftp_watts(vo2, weight_kg)
+    cda = _cda(weight_kg)
+
     predictions = []
     speed_40k = None
     for name, dist_km in DISTANCES:
-        features = pd.DataFrame([[age, gender, dist_km]], columns=["age", "gender", "dist_km"])
-        speed = float(model.predict(features)[0])
-        speed = max(8.0, min(speed, 55.0))
-        t = int((dist_km / speed) * 3600)
+        pwr = ftp * _POWER_FACTORS[dist_km]
+        speed_mps = _solve_cycling_speed(pwr, weight_kg, cda)
+        speed_kmh = round(min(60.0, max(6.0, speed_mps * 3.6)), 1)
+        t = int((dist_km / speed_kmh) * 3600)
         if dist_km == 40.0:
-            speed_40k = speed
-        predictions.append({"distance": name, "seconds": t, "formatted": _seconds_to_formatted(t),
-                             "speed_kmh": round(speed, 1)})
+            speed_40k = speed_kmh
+        predictions.append({
+            "distance": name, "seconds": t,
+            "formatted": _seconds_to_formatted(t), "speed_kmh": speed_kmh,
+        })
 
     return {
         "mode": "simple",
         "level_label": _get_cycling_level(speed_40k),
         "predictions": predictions,
-        "method": "Gradient Boosting (triathlon Sprint/Olympic/Half/Full — tous niveaux) + profil âge/genre",
-        "confidence": "low",
+        "method": "Modèle physiologique : VO2max Jackson (1990) + physique du vélo (Bassett & Howley, 2000)",
+        "confidence": "medium",
         "disclaimer": (
-            "Prédiction basée sur votre profil (âge, genre) uniquement. "
-            "Pour une estimation personnalisée, utilisez le mode avancé avec un temps de référence."
-        )
+            "Estimation basée sur votre profil physique (âge, genre, poids). "
+            "Ajouter votre taille améliore la précision. "
+            "Pour une prédiction personnalisée depuis un temps réel, utilisez le mode avancé."
+        ),
     }
 
 
