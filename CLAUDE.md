@@ -2,7 +2,7 @@
 
 > Ce fichier est le point d'entrée unique pour toute IA assistant ce projet.
 > Il est maintenu à jour à chaque évolution significative.
-> Dernière mise à jour : 2026-04-20
+> Dernière mise à jour : 2026-05-12
 
 ---
 
@@ -12,14 +12,16 @@
 **Formation** : Ynov Informatique — Bachelor 3 — Spécialité Data & IA  
 **Auteur** : Romeo Bernard (rbernard2005@gmail.com)  
 **Dépôt** : projet-fil-rouge  
-**Statut actuel** : Phase de mise en place (semaine 1)
+**Statut actuel** : Phase de finalisation (documentation + polish)
 
 ### Objectif produit
 Application web permettant à un utilisateur de saisir ses données physiologiques simples et d'obtenir des prédictions de performance sportive personnalisées.
 
-### Sports retenus (V1)
+### Sports couverts (V1 — livrés)
 - **Running** : prédiction de temps sur 5km, 10km, semi-marathon, marathon
 - **Escalade** : prédiction de niveau (cotation française falaise)
+- **Cyclisme** : prédiction de vitesse moyenne selon distance
+- **Natation** : prédiction d'allure (pace/100m) selon distance
 
 ---
 
@@ -51,38 +53,61 @@ Application web permettant à un utilisateur de saisir ses données physiologiqu
 - **Baseline** : Formule Riegel (T₂ = T₁ × (D₂/D₁)^1.06) + tables VDOT Jack Daniels
 
 ### Escalade
-- **Source** : 8a.nu Climbing Logbook (Kaggle — dcohen21/8anu-climbing-logbook)
-- **Taille** : 4,1M ascensions / 62 000 grimpeurs uniques
+- **Source** : jordizar/climb-dataset (Kaggle — miroir nettoyé de 8a.nu)
+- **Taille** : ~10 900 grimpeurs (8 728 train / 2 182 test)
 - **Colonnes clés** : Taille, poids, âge, années de pratique, cotation max (0-82)
-- **Format** : SQLite (4 tables : users, ascents, grades, methods)
 - **Qualité** : Dataset académique de référence (cité Stanford, UC Berkeley)
+- **Biais documenté** : Surreprésentation grimpeurs avancés (médiane 7b). Aucun débutant absolu.
+
+### Cyclisme & Natation
+- **Source** : vladislavboyadzhi/triathlon-results (Kaggle)
+- **Taille** : ~2,6M résultats (cyclisme) / ~2,6M résultats (natation)
+- **Colonnes clés** : Âge, sexe, distance, vitesse/allure
+- **Usage** : Mode simple uniquement (formules physiologiques) + ML basique âge/sexe/distance
 
 ---
 
-## 4. Modélisation prévue
+## 4. Modélisation — résultats réels
 
-### Running
+### Running ✅
 - **Problème** : Régression
-- **Features mode simple** : Âge, sexe, FC repos (→ VO2max estimé via Astrand → VDOT)
-- **Features mode avancé** : + Temps récent 5k ou 10k, volume hebdo
-- **Target** : Temps marathon (secondes) — extrapolable aux autres distances via Riegel
-- **Modèle** : Random Forest Regressor / Gradient Boosting
-- **Métriques** : MAE (s), MAPE (%), R²
-- **Baseline à battre** : Formule Riegel
+- **Mode simple** : Formule Uth (FC → VO2max) + VDOT Jack Daniels + Riegel (déterministe)
+- **Mode avancé** : ML avec temps récent 5k ou 10k
+- **Modèle** : Gradient Boosting
+- **Features** : Age, gender, 5K_sec, speed_5k
+- **Target** : Temps marathon (secondes) — extrapolé aux autres distances via Riegel
+- **Métriques** : MAE 13,9 min | MAPE 5,8% | R² 0,79
+- **Dataset** : Boston Marathon 2015-2017
 
-### Escalade
-- **Problème** : Régression (grade numérique 0-82) — mais avec logique conditionnelle selon expérience
+### Escalade ✅
+- **Problème** : Classification (5 niveaux)
 - **Architecture** :
-  - `years_cl = 0` → Mode POTENTIEL : règles physiologiques (dead hang, poids, BMI), fourchette large, pas de ML
-  - `years_cl < 1` → Mode ESTIMATION : ML avec intervalle élargi + disclaimer
-  - `years_cl ≥ 1` → Mode ML : Random Forest fiable (6a → 8b+)
+  - `years_cl = 0` → Mode POTENTIEL : règles physiologiques (dead hang, BMI, tractions), pas de ML
+  - `years_cl ≥ 1` → Mode ML : Gradient Boosting
 - **Features ML** : sex, height, weight, bmi, age, years_cl
-- **Features mode potentiel** : dead hang, poids, BMI, tractions (règles métier)
-- **Target** : Grade max numérique → cotation française
-- **Modèle** : Random Forest Regressor
-- **Métriques** : MAE en grades, Accuracy ±1 grade
-- **Baseline à battre** : Moyenne par tranche d'âge/poids
-- **Biais documenté** : Dataset surreprésenté en grimpeurs avancés (médiane 7b). 0 débutant absolu dans les données.
+- **Target** : level_class (0-4) → cotation française
+- **Métriques** : Accuracy 39,7% | Within ±1 classe : 80,1%
+- **Dataset** : jordizar/climb-dataset (10 910 grimpeurs)
+
+### Cyclisme ✅
+- **Problème** : Régression
+- **Mode simple** : Formule physiologique (poids requis selon puissance)
+- **Mode avancé** : ML
+- **Modèle** : Gradient Boosting
+- **Features** : age, gender, dist_km
+- **Target** : speed_kmh
+- **Métriques** : MAE 3,14 km/h | MAPE 11,0% | R² 0,12
+- **Dataset** : vladislavboyadzhi/triathlon-results (2,6M résultats)
+
+### Natation ✅
+- **Problème** : Régression
+- **Mode simple** : Formule physiologique (poids requis)
+- **Mode avancé** : ML
+- **Modèle** : Gradient Boosting
+- **Features** : age, gender, dist_m
+- **Target** : pace_per_100m (secondes)
+- **Métriques** : MAE 19,73 s/100m | MAPE 16,7% | R² 0,06
+- **Dataset** : vladislavboyadzhi/triathlon-results (2,6M résultats)
 
 ---
 
@@ -105,32 +130,49 @@ projet-fil-rouge/
 │   ├── 02_eda_climbing.ipynb
 │   ├── 03_model_running.ipynb
 │   ├── 04_model_climbing.ipynb
-│   └── 05_evaluation_recap.ipynb
+│   ├── 05_eda_cycling.ipynb
+│   ├── 06_eda_swimming.ipynb
+│   ├── 07_model_cycling.ipynb
+│   └── 08_model_swimming.ipynb
 │
 ├── models/
 │   ├── running_model.pkl
+│   ├── running_metadata.json
 │   ├── climbing_model.pkl
-│   └── models_metadata.json    ← Version, features, métriques, date
+│   ├── climbing_grade_map.pkl
+│   ├── climbing_level_config.pkl
+│   ├── climbing_metadata.json
+│   ├── cycling_model.pkl
+│   ├── cycling_metadata.json
+│   ├── swimming_model.pkl
+│   └── swimming_metadata.json
 │
 ├── api/
 │   ├── main.py
 │   ├── routers/
 │   │   ├── running.py
-│   │   └── climbing.py
+│   │   ├── climbing.py
+│   │   ├── cycling.py
+│   │   └── swimming.py
 │   ├── schemas/
-│   │   ├── running.py          ← Pydantic input/output
-│   │   └── climbing.py
+│   │   ├── running.py
+│   │   ├── climbing.py
+│   │   ├── cycling.py
+│   │   └── swimming.py
 │   ├── services/
 │   │   ├── running_service.py
-│   │   └── climbing_service.py
+│   │   ├── climbing_service.py
+│   │   ├── cycling_service.py
+│   │   └── swimming_service.py
 │   └── requirements.txt
 │
 ├── app/
 │   ├── main.py                 ← Streamlit entry point
-│   ├── pages/
-│   │   ├── running.py
-│   │   └── climbing.py
-│   └── components/
+│   └── pages/
+│       ├── running.py
+│       ├── climbing.py
+│       ├── cycling.py
+│       └── swimming.py
 │
 └── docs/
     ├── architecture.md
@@ -145,16 +187,20 @@ projet-fil-rouge/
 
 | Phase | Statut | Notes |
 |---|---|---|
-| Cadrage projet | ✅ Terminé | Sports, stack, datasets décidés |
-| Setup repo & docs | ✅ En cours | Structure créée |
-| Téléchargement datasets | ✅ Terminé | Boston Marathon (data/raw/running/) + Climb Dataset (data/raw/climbing/) |
-| EDA Running | ✅ Notebook créé | notebooks/01_eda_running.ipynb — à exécuter |
-| EDA Escalade | ✅ Notebook créé | notebooks/02_eda_climbing.ipynb — à exécuter |
-| Modèle Running | ✅ Notebook créé | notebooks/03_model_running.ipynb — à exécuter |
-| Modèle Escalade | ✅ Notebook créé | notebooks/04_model_climbing.ipynb — à exécuter |
-| FastAPI | ⬜ À faire | |
-| Streamlit | ⬜ À faire | |
-| Documentation finale | ⬜ À faire | |
+| Cadrage projet | ✅ Terminé | 4 sports retenus, stack décidée |
+| Setup repo & docs | ✅ Terminé | Structure complète |
+| Téléchargement datasets | ✅ Terminé | Boston Marathon + Climb Dataset + Triathlon Results |
+| EDA Running | ✅ Terminé | notebooks/01_eda_running.ipynb |
+| EDA Escalade | ✅ Terminé | notebooks/02_eda_climbing.ipynb |
+| EDA Cyclisme | ✅ Terminé | notebooks/05_eda_cycling.ipynb |
+| EDA Natation | ✅ Terminé | notebooks/06_eda_swimming.ipynb |
+| Modèle Running | ✅ Terminé | GBM — MAE 13,9 min, R² 0,79 |
+| Modèle Escalade | ✅ Terminé | GBM classif — Within ±1 classe : 80,1% |
+| Modèle Cyclisme | ✅ Terminé | GBM — MAE 3,14 km/h |
+| Modèle Natation | ✅ Terminé | GBM — MAE 19,7 s/100m |
+| FastAPI | ✅ Terminé | 4 routers, 7 endpoints, Swagger dispo sur :8008/docs |
+| Streamlit | ✅ Terminé | 4 pages, mode simple + avancé |
+| Documentation finale | ⬜ À faire | README à jour, docs/ à compléter |
 
 ---
 

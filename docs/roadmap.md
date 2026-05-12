@@ -1,13 +1,13 @@
 # Roadmap — Projet fil rouge
 
-> Dernière mise à jour : 2026-04-20
+> Dernière mise à jour : 2026-05-12
 
 ---
 
 ## État global
 
-**Phase courante** : Semaine 1 — Setup & acquisition données  
-**Prochaine étape** : Télécharger les datasets Kaggle et lancer l'EDA Running
+**Phase courante** : Finalisation — documentation technique + polish  
+**Prochaine étape** : Compléter `docs/`, vérifier le notebook `05_evaluation_recap.ipynb`, préparer la soutenance
 
 ---
 
@@ -15,23 +15,24 @@
 
 | Semaine | Phase | Objectifs | Livrables | Statut |
 |---|---|---|---|---|
-| 1 | Setup & Data | Init repo, structure dossiers, téléchargement datasets, audit qualité | Repo structuré, données brutes présentes, `.gitignore`, `README` | 🔄 En cours |
-| 2 | EDA Running | Exploration Boston Marathon : distributions, corrélations, outliers, splits | `notebooks/01_eda_running.ipynb` | ⬜ |
-| 3 | EDA Escalade | Exploration 8a.nu : chargement SQLite, jointures, distributions, corrélations | `notebooks/02_eda_climbing.ipynb` | ⬜ |
-| 4 | Feature Eng. Running | Nettoyage, variables dérivées, baseline Riegel/VDOT codée | Features prêtes, baseline validée | ⬜ |
-| 5 | Modèle Running | Entraînement Random Forest/GBM, évaluation, export | `notebooks/03_model_running.ipynb`, `models/running_model.pkl` | ⬜ |
-| 6 | Modèle Escalade | Feature engineering, entraînement, évaluation, export | `notebooks/04_model_climbing.ipynb`, `models/climbing_model.pkl` | ⬜ |
-| 7 | Évaluation recap | Comparaison baseline vs ML, interprétation, visualisations finales | `notebooks/05_evaluation_recap.ipynb` | ⬜ |
-| 8 | FastAPI | Endpoints `/predict/running` et `/predict/climbing`, schémas Pydantic, tests | API fonctionnelle testable via Swagger | ⬜ |
-| 9 | Streamlit | Interface 2 modes (simple/avancé), visualisations résultats, intégration API | App déployable localement | ⬜ |
-| 10 | Finalisation | Documentation complète, README, répétition soutenance | Dépôt final livrable | ⬜ |
+| 1 | Setup & Data | Init repo, structure dossiers, téléchargement datasets, audit qualité | Repo structuré, données brutes présentes, `.gitignore`, `README` | ✅ Terminé |
+| 2 | EDA Running | Exploration Boston Marathon : distributions, corrélations, outliers, splits | `notebooks/01_eda_running.ipynb` | ✅ Terminé |
+| 3 | EDA Escalade | Exploration climb-dataset : distributions, corrélations | `notebooks/02_eda_climbing.ipynb` | ✅ Terminé |
+| 4 | Feature Eng. Running | Nettoyage, variables dérivées, baseline Riegel/VDOT codée | Features prêtes, baseline validée | ✅ Terminé |
+| 5 | Modèle Running | Entraînement GBM, évaluation, export | `notebooks/03_model_running.ipynb`, `models/running_model.pkl` | ✅ Terminé |
+| 6 | Modèle Escalade | Feature engineering, entraînement, évaluation, export | `notebooks/04_model_climbing.ipynb`, `models/climbing_model.pkl` | ✅ Terminé |
+| 6b | EDA + Modèles Cyclisme/Natation | Extension périmètre — 2 sports supplémentaires | `notebooks/05-08_*.ipynb`, `models/cycling_model.pkl`, `models/swimming_model.pkl` | ✅ Terminé |
+| 7 | Évaluation recap | Comparaison baseline vs ML, interprétation, visualisations finales | `notebooks/05_evaluation_recap.ipynb` | ⬜ À faire |
+| 8 | FastAPI | Endpoints 4 sports, schémas Pydantic, tests | API fonctionnelle testable via Swagger | ✅ Terminé |
+| 9 | Streamlit | Interface 4 sports (mode simple/avancé), visualisations résultats | App déployable localement | ✅ Terminé |
+| 10 | Finalisation | Documentation complète, README, répétition soutenance | Dépôt final livrable | 🔄 En cours |
 
 ---
 
 ## Décisions de périmètre
 
-- **V1** : Running + Escalade
-- **V2 potentielle** : Natation, Trail (si temps disponible après semaine 9)
+- **V1 livrée** : Running + Escalade + Cyclisme + Natation (4 sports)
+- **Écarté en cours de projet** : Tennis (module créé puis supprimé — données insuffisantes)
 - **Écarté définitivement** : Football, Basket (problème data mal posé pour profil individuel)
 
 ---
@@ -40,8 +41,7 @@
 
 | Risque | Probabilité | Impact | Mitigation |
 |---|---|---|---|
-| Dataset 8a.nu trop complexe à charger (SQLite) | Faible | Moyen | Fallback : jordizar/climb-dataset (CSV pré-nettoyé) |
-| Boston Marathon insuffisant pour mode simple running | Moyen | Moyen | Mode simple = formules Astrand/VDOT (déterministe, pas ML) |
-| Streamlit trop limité pour les visualisations souhaitées | Faible | Faible | Plotly natif dans Streamlit — très capable |
-| Temps insuffisant pour Streamlit + FastAPI | Moyen | Faible | FastAPI peut être simplifié (services appelés directement par Streamlit) |
-| Modèle escalade : biais dataset (surreprésentation grimpeurs avancés sur 8a.nu) | Moyen | Moyen | Documenter le biais, stratifier l'échantillon d'entraînement |
+| R² faible cyclisme (0,12) et natation (0,06) | Réalisé | Moyen | Documenté dans les métadonnées — mode simple (formules physio) mis en avant |
+| Dataset 8a.nu : biais grimpeurs avancés | Réalisé | Moyen | Stratification appliquée, biais documenté dans les métadonnées |
+| Streamlit trop limité pour les visualisations souhaitées | Non réalisé | — | Plotly natif utilisé — aucun problème |
+| Temps insuffisant pour documentation finale | Actif | Moyen | docs/ à compléter en priorité |
