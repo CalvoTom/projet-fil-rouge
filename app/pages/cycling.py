@@ -6,7 +6,8 @@ import pandas as pd
 
 st.set_page_config(page_title="Vélo — Sport Predictor", page_icon="🚴", layout="wide")
 
-API_URL = "http://localhost:8008/api/v1/cycling"
+import os
+API_URL = os.environ.get("API_URL", "http://localhost:8008") + "/api/v1/cycling"
 
 def seconds_to_display(s):
     s = int(s)

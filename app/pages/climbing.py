@@ -5,7 +5,8 @@ import plotly.express as px
 
 st.set_page_config(page_title="Escalade — Sport Predictor", page_icon="🧗", layout="wide")
 
-API_URL = "http://localhost:8008/api/v1/climbing"
+import os
+API_URL = os.environ.get("API_URL", "http://localhost:8008") + "/api/v1/climbing"
 
 LEVEL_COLORS = {
     "Débutant (< 6a)":                "#74C0FC",

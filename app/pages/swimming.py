@@ -6,7 +6,8 @@ import pandas as pd
 
 st.set_page_config(page_title="Natation — Sport Predictor", page_icon="🏊", layout="wide")
 
-API_URL = "http://localhost:8008/api/v1/swimming"
+import os
+API_URL = os.environ.get("API_URL", "http://localhost:8008") + "/api/v1/swimming"
 
 def plot_predictions(predictions):
     distances = [p["distance"] for p in predictions]
