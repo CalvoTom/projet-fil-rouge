@@ -10,7 +10,7 @@ data/processed/
 !data/external/
 
 # Modèles sérialisés (versionnés séparément si nécessaire)
-models/*.pkl
+# models/*.pkl
 
 # Python
 __pycache__/
