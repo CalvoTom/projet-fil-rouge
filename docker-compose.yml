@@ -5,8 +5,6 @@ services:
       dockerfile: Dockerfile.api
     ports:
       - "8008:8008"
-    volumes:
-      - ./models:/app/models
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8008/health"]
       interval: 30s
