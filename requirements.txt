@@ -11,7 +11,7 @@ requests>=2.31.0
 # Data & ML
 pandas>=2.0.0
 numpy>=1.26.0
-scikit-learn>=1.4.0
+scikit-learn==1.7.2  # version d'entraînement des modèles .pkl — ne pas changer sans réentraîner
 statsmodels>=0.14.0
 joblib>=1.3.0
 
