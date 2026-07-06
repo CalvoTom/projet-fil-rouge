@@ -163,8 +163,11 @@ if submitted:
                     st.warning(f"⚠️ {data['disclaimer']}")
 
             else:
-                err = resp.json()
-                st.error(f"Erreur API ({resp.status_code}) : {err.get('detail', resp.text)}")
+                try:
+                    detail = resp.json().get("detail", resp.text)
+                except Exception:
+                    detail = resp.text or "Erreur inconnue"
+                st.error(f"Erreur API ({resp.status_code}) : {detail}")
 
         except requests.exceptions.ConnectionError:
             st.error("❌ L'API n'est pas accessible. Lancez-la avec : `python3 -m uvicorn api.main:app --reload --port 8008`")
